@@ -4,12 +4,6 @@ Ext.define('CissProcSel.view.main.Main', {
     viewModel: 'main',
     xtype: 'app-main',
 
-    requires: [
-        'Ext.plugin.Viewport',
-        'Ext.window.MessageBox',
-        'CissProcSel.view.main.MainController',
-        'CissProcSel.view.main.MainModel',
-    ],
     layout: { 
         align: 'stretch', 
         type: 'vbox' 
@@ -17,6 +11,7 @@ Ext.define('CissProcSel.view.main.Main', {
     items:[
         {
             xtype: 'panel',
+            id: 'panel_principal1',
             title: 'Ciss Processo Seletivo Crud ExtJs',
             flex: 1,
             layout: { 
@@ -26,6 +21,7 @@ Ext.define('CissProcSel.view.main.Main', {
             items: [
                 {
                     xtype: 'panel',
+                    id: 'panel_principal2',
                     layout: {
                         type: 'hbox'
                     },
@@ -37,12 +33,14 @@ Ext.define('CissProcSel.view.main.Main', {
                             margin: '5 5 5 5',
                             handler: function(b){
                                 params = {
+                                    win: Ext.getCmp('panel_principal1'),
+                                    id: -100,
                                     nome: 'Geovane',
                                     saveFn: function(b){
                                         alert('sdsd');
                                     }
                                 }
-                                create_viewcad(params);
+                                load(params);
                             }
                         },
                         {
@@ -57,7 +55,6 @@ Ext.define('CissProcSel.view.main.Main', {
                             cls: 'btnExcluir',
                             margin: '5 5 5 5',
                             handler: function(b){
-                                load();
                             }
                         },
                     ]
@@ -65,7 +62,9 @@ Ext.define('CissProcSel.view.main.Main', {
                 {
                     xtype: 'gridpanel',
                     flex: 1,
-                    store: storeData(),
+                    id: 'gridcad',
+                    store: Ext.data.StoreManager.lookup('storeData'),
+                    //store: getAllData(1),
                     margin: '5 5 5 5',
                     loadmask: true,
                     stateful: true,
@@ -83,31 +82,57 @@ Ext.define('CissProcSel.view.main.Main', {
                             emptyMsg: "Não Há Dadaos"
                         }
                     ],
+                    listeners: {
+                        afterrender: function(e){
+                        }
+                    }
                 }
             ],
             listeners: {
-                beforerender: function (b){
+                beforerender: function(e){
                     storeData();
+                },
+                afterrender: function(e){
+                    getAllData(1);
                 }
             }
         }
     ]
 });
 
+function getAllData(paging){
 
-function storeData () {
-    var a = Ext.create('Ext.data.Store', {
+    var params = {
+        route: 'mnu_funcionario',
+        paging: paging,
+        filters: '',
+        orders: 'Order by id desc'
+    }
+    var mask = loading(Ext.getCmp('panel_principal2'));
+
+    Ext.Ajax.request({
+        url: 'http://localhost:8083/v1/dynamic',
+        jsonData: JSON.stringify(params),
+
+        success: function(response){
+            var response = Ext.decode(response.responseText);
+            if(response.ret === 'success'){
+                var store = Ext.getCmp('gridcad').getStore();
+                store.getStore().reload();
+
+            } else {
+                alertError(response.motivo);
+            }
+        },
+        failure: function(err){
+            alertError(err);
+        }
+    });
+}
+function storeData() {
+    Ext.create('Ext.data.Store', {
         storeId: 'storeData',
         fields: ['id', 'nome'],
-        /* filters: [{
-            property: 'DelMode',
-            value: false
-        }], */
-        data: [
-            { id: 1, nome: 'Geovane' },
-            { id: 2, nome: 'Edna' },
-            { id: 3, nome: 'Pietra' }
-        ]
+        data: []
     });
-    return a;
 }
