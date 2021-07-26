@@ -78,33 +78,49 @@ function dataDynamicGrid(e){
 }
 
 function deleteDynamicGrid(e,selections){
-  var ids = '';
-  selections.forEach(element => {
-    ids += element.data.id + ',';
-  });
 
-  ids = ids.substring(0,(ids.length - 1));
-  var params = {
-    ids: ids,
-    tablebase: e.tablebase
-  }
+  Ext.Msg.show({
+    title:'Processo Seletivo Ciss',
+    msg: 'Tem certeza ue gostaria de excluir este(s) ('+ selections.length+') registros?',
+    icon: Ext.Msg.QUESTION,
+    buttons: Ext.Msg.YESNO,
+    fn: function(btn){
+      if(btn == 'yes'){
 
-  e.setLoading(true);
-  Ext.Ajax.request({
-      url: sisUrlRoute+'deleteregisters',
-      jsonData: JSON.stringify(params),
+        var ids = '';
+        selections.forEach(element => {
+          ids += element.data.id + ',';
+        });
 
-      success: function(response){
-          var response = Ext.decode(response.responseText);
-          if(response.ret === 'success'){
-            dataDynamicGrid(Ext.getCmp('grid_funcionario'));
-          } else {
-              alertError(response.motivo);
-          }
-          e.setLoading(false);
-      },
-      failure: function(err){
-          alertError(err);
+        ids = ids.substring(0,(ids.length - 1));
+        var params = {
+          ids: ids,
+          tablebase: e.tablebase
+        }
+
+        e.setLoading(true);
+        Ext.Ajax.request({
+            url: sisUrlRoute+'deleteregisters',
+            jsonData: JSON.stringify(params),
+
+            success: function(response){
+                var response = Ext.decode(response.responseText);
+                if(response.ret === 'success'){
+                  dataDynamicGrid(Ext.getCmp('grid_funcionario'));
+                } else {
+                    alertError(response.motivo);
+                }
+                e.setLoading(false);
+            },
+            failure: function(err){
+                alertError(err);
+            }
+        });
+
+      } else {
+        return false;
       }
+    }
   });
+
 }
