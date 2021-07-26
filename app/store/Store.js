@@ -7,9 +7,7 @@ Ext.define('CissProcSel.store.Store', {
     'id', 'nome','sobrenome','emai','nis'
   ],
   data: { 
-    items: [
-      { id: '1', nome: 'Geovane', sobrenome: 'Araújo', email:'geovane@', nis: '123' }
-    ]
+    items: []
   },
 
   proxy: {

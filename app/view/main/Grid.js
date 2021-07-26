@@ -32,15 +32,20 @@ Ext.define('CissProcSel.view.main.Grid', {
       afterrender: function(e){
         dataDynamicGrid(e);
       },
-      rowdblclick: function(){
-        onSelected();
+      rowdblclick: function(e){
+        var obj = e.grid.getSelectionModel().getSelection();
+        var params = {
+            win: Ext.getCmp('panel_principal1'),
+            id: obj[0].data.id,
+            saveFn: function(b){
+                dataDynamicGrid(Ext.getCmp('grid_funcionario'));
+            }
+        }
+        eval('load_'+e.grid.context)(params);
       }, 
   }
 });
 
-function onSelected(){
-  alert('d');
-}
 
 function dataDynamicGrid(e){
   var params = {
@@ -52,7 +57,7 @@ function dataDynamicGrid(e){
 
   e.setLoading(true);
   Ext.Ajax.request({
-      url: 'http://localhost:8083/v1/dynamic',
+      url: sisUrlRoute+'dynamic',
       jsonData: JSON.stringify(params),
 
       success: function(response){
@@ -86,13 +91,13 @@ function deleteDynamicGrid(e,selections){
 
   e.setLoading(true);
   Ext.Ajax.request({
-      url: 'http://localhost:8083/v1/deleteregisters',
+      url: sisUrlRoute+'deleteregisters',
       jsonData: JSON.stringify(params),
 
       success: function(response){
           var response = Ext.decode(response.responseText);
           if(response.ret === 'success'){
-            dataDynamicGrid(Ext.getCmp('gridcad'));
+            dataDynamicGrid(Ext.getCmp('grid_funcionario'));
           } else {
               alertError(response.motivo);
           }

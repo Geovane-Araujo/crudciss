@@ -5,18 +5,21 @@ Ext.define('CissProcSel.view.main.Cadastro', {
 
   onOkClick: function(){
 
+    if(!formValidate_funcionario())
+      return;
+
     var win = Ext.getCmp('cadastro_form_ciss1');
     win.setLoading(true);
 
-    readControls(params.obj);
+    readControls(win.params);
     Ext.Ajax.request({
-      url: 'http://localhost:8083/v1/savepessoa',
-      jsonData: JSON.stringify(params.obj),
+      url: sisUrlRoute+'savepessoa',
+      jsonData: JSON.stringify(win.params.obj),
 
       success: function(response){
           var response = Ext.decode(response.responseText);
           if(response.ret === 'success'){
-              eval(params.saveFn)(params);
+              eval(win.params.saveFn)(win.params);
               Ext.getCmp('cadastro_form_ciss1').destroy();
           } else {
               alertError(response.motivo);
@@ -34,19 +37,37 @@ Ext.define('CissProcSel.view.main.Cadastro', {
   }
 });
 
-function load(params){
+function formValidate_funcionario(){
+
+  var re = /\S+@\S+\.\S+/;
+  
+  if(!Ext.getCmp('form_funcionario').isValid()){
+    alertError('Campos Sem Preenchimento');
+    return false
+  }
+  else if(!re.test(Ext.getCmp('field_email_cad').getValue())){
+    alertError('Campo e-mail com valor inválido');
+    Ext.getCmp('field_email_cad').isFocusable(true);
+    return false;
+  } 
+  return true;
+
+}
+
+function load_funcionario(params){
+
 
   params.win.setLoading(true);
 
   Ext.Ajax.request({
     method: 'GET',
-    url: 'http://localhost:8083/v1/getpessoa/' + params.id,
+    url: sisUrlRoute+'getpessoa/' + params.id,
 
     success: function(response){
         var response = Ext.decode(response.responseText);
         if(response.ret === 'success'){
-            this.params.obj = response.obj;
-            create_viewcad(response.obj);
+            params.obj = response.obj;
+            create_viewcad(params);
         } else {
             alertError(response.motivo);
         }
@@ -75,6 +96,7 @@ function create_viewcad(params){
     items: [
       {
         xtype: 'form',
+        id: 'form_funcionario',
         layout: {
           type: 'vbox',
           align: 'stretch'
@@ -94,7 +116,10 @@ function create_viewcad(params){
                 labelAlign: 'top',
                 fieldLabel: 'Nome',
                 id: 'field_nome_cad',
-                focusable: false,
+                enforceMaxLength: 30,
+                maxLength: 30,
+                minLength: 2,
+                allowBlank: false,
                 flex: 1,
                 margin: '5 5 5 5'
               },
@@ -102,7 +127,10 @@ function create_viewcad(params){
                 xtype: 'textfield',
                 labelAlign: 'top',
                 fieldLabel: 'Sobrenome',
-                focusable: false,
+                enforceMaxLength: 50,
+                maxLength: 50,
+                minLength: 2,
+                allowBlank: false,
                 id: 'field_sobrenome_cad',
                 flex: 1.1,
                 margin: '5 5 5 5'
@@ -122,7 +150,8 @@ function create_viewcad(params){
                 labelAlign: 'top',
                 fieldLabel: 'Email',
                 id: 'field_email_cad',
-                focusable: false,
+                allowBlank: false,
+                focusable: true,
                 flex: 1,
                 margin: '5 5 5 5'
               },
@@ -159,15 +188,15 @@ function create_viewcad(params){
 
 
 function writeControls(params){
-  Ext.getCmp('field_nome_cad').setValue(params.nome);
-  Ext.getCmp('field_sobrenome_cad').setValue(params.sobrenome);
-  Ext.getCmp('field_email_cad').setValue(params.email);
-  Ext.getCmp('field_nis_cad').setValue(params.nis);
+  Ext.getCmp('field_nome_cad').setValue(params.obj.nome);
+  Ext.getCmp('field_sobrenome_cad').setValue(params.obj.sobrenome);
+  Ext.getCmp('field_email_cad').setValue(params.obj.email);
+  Ext.getCmp('field_nis_cad').setValue(params.obj.nis);
 }
 
 function readControls(params){
-  params.nome = Ext.getCmp('field_nome_cad').getValue();
-  params.sobrenome = Ext.getCmp('field_sobrenome_cad').getValue();
-  params.email = Ext.getCmp('field_email_cad').getValue();
-  params.nis = Ext.getCmp('field_nis_cad').getValue();
+  params.obj.nome = Ext.getCmp('field_nome_cad').getValue();
+  params.obj.sobrenome = Ext.getCmp('field_sobrenome_cad').getValue();
+  params.obj.email = Ext.getCmp('field_email_cad').getValue();
+  params.obj.nis = Ext.getCmp('field_nis_cad').getValue();
 }

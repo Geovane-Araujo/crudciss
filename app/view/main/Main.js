@@ -2,7 +2,7 @@ Ext.define('CissProcSel.view.main.MainController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.main',
 });
-
+var sisUrlRoute = '';
 Ext.define('CissProcSel.view.main.Main', {
     extend: 'Ext.Container',
     controller: 'main',
@@ -38,13 +38,13 @@ Ext.define('CissProcSel.view.main.Main', {
                             margin: '5 5 5 5',
                             handler: function(b){
                                 params = {
+                                    win: Ext.getCmp('panel_principal1'),
                                     id: -100,
-                                    nome: 'Geovane',
                                     saveFn: function(b){
                                         dataDynamicGrid(Ext.getCmp('grid_funcionario'));
                                     }
                                 }
-                                load(params);
+                                load_funcionario(params);
                             }
                         },
                         {
@@ -58,12 +58,11 @@ Ext.define('CissProcSel.view.main.Main', {
                                     params = {
                                         win: Ext.getCmp('panel_principal1'),
                                         id: obj[0].data.id,
-                                        nome: 'Geovane',
                                         saveFn: function(b){
                                             dataDynamicGrid(Ext.getCmp('grid_funcionario'));
                                         }
                                     }
-                                    load(params);
+                                    load_funcionario(params);
                                 } else {
                                     alertError('Nenhum Registro Selecionado');
                                 }
@@ -91,6 +90,7 @@ Ext.define('CissProcSel.view.main.Main', {
                 {
                     xtype: 'explorergrid',
                     flex: 1,
+                    context: 'funcionario',
                     route: 'mnu_funcionario',
                     id: 'grid_funcionario',
                     margin: '5 5 5 5',
@@ -98,7 +98,12 @@ Ext.define('CissProcSel.view.main.Main', {
                 }
             ]
         }
-    ]
+    ],
+    listeners: {
+        beforerender: function(){
+            sisUrlRoute = 'http://localhost:8083/v1/';
+        }
+    }
 });
 
 function getAllData(paging){
