@@ -1,3 +1,8 @@
+Ext.define('CissProcSel.view.main.MainController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.main',
+});
+
 Ext.define('CissProcSel.view.main.Main', {
     extend: 'Ext.Container',
     controller: 'main',
@@ -33,11 +38,10 @@ Ext.define('CissProcSel.view.main.Main', {
                             margin: '5 5 5 5',
                             handler: function(b){
                                 params = {
-                                    win: Ext.getCmp('panel_principal1'),
                                     id: -100,
                                     nome: 'Geovane',
                                     saveFn: function(b){
-                                        alert('sdsd');
+                                        dataDynamicGrid(Ext.getCmp('grid_funcionario'));
                                     }
                                 }
                                 load(params);
@@ -48,6 +52,23 @@ Ext.define('CissProcSel.view.main.Main', {
                             text: 'Editar',
                             cls: 'btnEditar',
                             margin: '5 5 0 5',
+                            handler: function(b){
+                                var obj = Ext.getCmp('grid_funcionario').getSelectionModel().getSelection();
+                                if(obj.length > 0){
+                                    params = {
+                                        win: Ext.getCmp('panel_principal1'),
+                                        id: obj[0].data.id,
+                                        nome: 'Geovane',
+                                        saveFn: function(b){
+                                            dataDynamicGrid(Ext.getCmp('grid_funcionario'));
+                                        }
+                                    }
+                                    load(params);
+                                } else {
+                                    alertError('Nenhum Registro Selecionado');
+                                }
+                                
+                            }
                         },
                         {
                             xtype: 'button',
@@ -55,47 +76,27 @@ Ext.define('CissProcSel.view.main.Main', {
                             cls: 'btnExcluir',
                             margin: '5 5 5 5',
                             handler: function(b){
+                                var obj = Ext.getCmp('grid_funcionario').getSelectionModel().getSelection();
+                                if(obj.length > 0){
+                                    deleteDynamicGrid(Ext.getCmp('grid_funcionario'),obj);
+
+                                } else {
+                                    alertError('Nenhum Registro Selecionado');
+                                }
+                                
                             }
                         },
                     ]
                 },
                 {
-                    xtype: 'gridpanel',
+                    xtype: 'explorergrid',
                     flex: 1,
-                    id: 'gridcad',
-                    store: Ext.data.StoreManager.lookup('storeData'),
-                    //store: getAllData(1),
+                    route: 'mnu_funcionario',
+                    id: 'grid_funcionario',
                     margin: '5 5 5 5',
-                    loadmask: true,
-                    stateful: true,
-                    columns: [
-                        { text: 'ID', dataIndex: 'id'},
-                        { text: 'Nome', dataIndex: 'nome', flex: 1},
-                    ],
-                    dockedItems: [
-                        {
-                            xtype: 'pagingtoolbar',
-                            dock: 'bottom',
-                            width: 360,
-                            displayInfo: true,
-                            displayMsg: '{0} - {1} de {2}',
-                            emptyMsg: "Não Há Dadaos"
-                        }
-                    ],
-                    listeners: {
-                        afterrender: function(e){
-                        }
-                    }
+                    tablebase: 'pessoa'
                 }
-            ],
-            listeners: {
-                beforerender: function(e){
-                    storeData();
-                },
-                afterrender: function(e){
-                    getAllData(1);
-                }
-            }
+            ]
         }
     ]
 });
